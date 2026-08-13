@@ -5,12 +5,26 @@ const RARITIES=[
  {name:'Legendary',min:830,max:939,color:'legendary'},
  {name:'Mythic',min:940,max:999,color:'mythic'}
 ];
+function safeJSON(key,fallback){
+  try{
+    const raw=localStorage.getItem(key);
+    if(!raw)return fallback;
+    const parsed=JSON.parse(raw);
+    return parsed ?? fallback;
+  }catch(err){
+    console.warn(`[SummonX] localStorage inválido em ${key}; restaurando padrão.`,err);
+    localStorage.removeItem(key);
+    return fallback;
+  }
+}
 const gs={
- coins:+localStorage.getItem('dc')||0,
- coll:JSON.parse(localStorage.getItem('dcoll')||'[]'),
+ coins:Number(localStorage.getItem('dc'))||0,
+ coll:safeJSON('dcoll',[]),
  roll:[],savesLeft:0,rolling:false,
- deck:JSON.parse(localStorage.getItem('summonxArenaDeck')||'[]')
+ deck:safeJSON('summonxArenaDeck',[])
 };
+if(!Array.isArray(gs.coll))gs.coll=[];
+if(!Array.isArray(gs.deck))gs.deck=[];
 let battle=null, lastFrame=0, raf=0;
 
 function save(){
