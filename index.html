@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#090612" />
+  <title>Summon X — Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+
+  <header class="topbar">
+    <button class="brand" data-section="roll" aria-label="Summon X">
+      <span class="brand-mark">X</span>
+      <span><b>SUMMON</b><strong>X</strong></span>
+    </button>
+    <div class="wallet"><span>◈</span><b id="coins">0</b></div>
+  </header>
+
+  <nav class="nav">
+    <button class="nav-btn active" data-section="roll"><span>✦</span>Rolar</button>
+    <button class="nav-btn" data-section="collection"><span>▦</span>Coleção</button>
+    <button class="nav-btn nav-arena" data-section="arena"><span>⚔</span>Arena</button>
+    <button class="nav-btn" data-section="shop"><span>⬡</span>Loja</button>
+  </nav>
+
+  <main>
+    <section class="section active" id="sec-roll">
+      <div class="hero">
+        <div class="eyebrow">SUMMON PORTAL</div>
+        <h1>Invoque seu próximo <span>campeão.</span></h1>
+        <p>Role 5 personagens aleatórios e escolha até 2 para a sua coleção. O sistema continua usando AniList, com Jikan como reserva.</p>
+        <button id="rollBtn" class="primary big" onclick="rollCards()"><span>✦</span> ROLAR 5 CARTAS</button>
+        <div class="roll-status">
+          <span id="rollInfo">Pronto para invocar.</span>
+          <b id="rollSaves"></b>
+        </div>
+      </div>
+      <div id="rollResults" class="card-grid roll-grid"></div>
+    </section>
+
+    <section class="section" id="sec-collection">
+      <div class="section-head">
+        <div><div class="eyebrow">ARSENAL</div><h2>Minha coleção</h2><p>Suas cartas antigas continuam aqui.</p></div>
+        <div class="collection-count"><b id="collectionCount">0</b><span>cartas</span></div>
+      </div>
+      <div class="filters">
+        <input id="searchInput" placeholder="Buscar personagem ou universo..." />
+        <select id="rarityFilter"><option value="">Todas raridades</option><option>Uncommon</option><option>Rare</option><option>Ultra Rare</option><option>Legendary</option><option>Mythic</option></select>
+        <select id="sortFilter"><option value="newest">Mais recentes</option><option value="power">Maior poder</option><option value="name">Nome A–Z</option></select>
+      </div>
+      <div id="collectionGrid" class="card-grid"></div>
+    </section>
+
+    <section class="section" id="sec-arena">
+      <div class="section-head arena-head">
+        <div><div class="eyebrow">REAL-TIME BATTLE</div><h2>Summon Arena</h2><p>Monte 8 cartas. Quatro ficam na mão e a Estamina recarrega durante a partida.</p></div>
+        <button class="primary" id="startArenaBtn" onclick="openArena()">⚔ ENTRAR NA ARENA</button>
+      </div>
+
+      <div class="deck-builder">
+        <div class="deck-header"><div><b>Deck de batalha</b><span id="deckCounter">0/8</span></div><small>Clique nas cartas abaixo para adicionar/remover.</small></div>
+        <div id="deckSlots" class="deck-slots"></div>
+        <div class="deck-stats"><span>Custo médio <b id="avgCost">—</b></span><span>Poder total <b id="deckPower">0</b></span></div>
+      </div>
+
+      <h3 class="pick-title">Escolha da coleção</h3>
+      <div id="arenaCollection" class="mini-grid"></div>
+    </section>
+
+    <section class="section" id="sec-shop">
+      <div class="section-head">
+        <div><div class="eyebrow">SUMMON MARKET</div><h2>Loja</h2><p>Use moedas obtidas na Arena.</p></div>
+      </div>
+      <div class="shop-grid">
+        <article class="pack"><span class="pack-icon">◇</span><h3>Pacote Básico</h3><p>3 personagens, Rare ou superior.</p><b>◈ 100</b><button onclick="buyPack(100,'Rare')">COMPRAR</button></article>
+        <article class="pack premium"><span class="pack-icon">✦</span><h3>Pacote Premium</h3><p>3 personagens, Ultra Rare ou superior.</p><b>◈ 300</b><button onclick="buyPack(300,'Ultra Rare')">COMPRAR</button></article>
+        <article class="pack legendary"><span class="pack-icon">♛</span><h3>Pacote Lendário</h3><p>3 personagens, Legendary ou superior.</p><b>◈ 800</b><button onclick="buyPack(800,'Legendary')">COMPRAR</button></article>
+      </div>
+    </section>
+  </main>
+
+  <div id="battleScreen" class="battle-screen" aria-hidden="true">
+    <div class="battle-shell">
+      <div class="battle-hud">
+        <button class="hud-btn" onclick="leaveArena()">✕</button>
+        <div class="battle-title"><span id="battleMode">SUMMON ARENA</span><b id="battleTimer">3:00</b></div>
+        <div class="crowns"><span class="enemy-crowns">♜ <b id="enemyCrowns">0</b></span><span class="player-crowns">♜ <b id="playerCrowns">0</b></span></div>
+      </div>
+
+      <div id="arenaField" class="arena-field">
+        <div class="arena-lane lane-left"></div><div class="arena-lane lane-right"></div>
+        <div class="river"></div><div class="bridge bridge-left"></div><div class="bridge bridge-right"></div>
+        <div class="deploy-line"></div>
+        <div id="unitLayer" class="unit-layer"></div>
+        <div id="fxLayer" class="fx-layer"></div>
+        <div id="towerLayer" class="tower-layer"></div>
+        <div id="deployHint" class="deploy-hint">SOLTE A CARTA NA SUA METADE DA ARENA</div>
+        <div id="battleBanner" class="battle-banner"></div>
+      </div>
+
+      <div class="battle-bottom">
+        <div class="next-card"><span>PRÓXIMA</span><div id="nextCard"></div></div>
+        <div id="battleHand" class="battle-hand"></div>
+        <div class="energy-wrap">
+          <div class="energy-top"><b>ESTAMINA</b><span id="energyText">5/10</span></div>
+          <div class="energy-bar"><i id="energyFill"></i><div class="ticks"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <div id="modal" class="modal"><div class="modal-card" id="modalCard"></div></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
